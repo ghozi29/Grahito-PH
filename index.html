@@ -11,7 +11,7 @@
         background-color: #222222;
         margin: 0;
         padding: 0;
-        color: #ffffff; /* Tambahkan warna teks default untuk keseluruhan body */
+        color: #ffffff;
     }
     .container {
         display: flex;
@@ -24,9 +24,10 @@
         justify-content: center;
         align-items: center;
         margin-bottom: 20px;
+        flex-wrap: wrap; /* Penting untuk responsif: elemen akan melipat ke baris baru */
     }
     .column {
-        margin: 0 10px;
+        margin: 0 10px; /* Jaga ini jika diperlukan untuk tata letak kolom yang lebih spesifik */
     }
     .box {
         width: 220px;
@@ -58,17 +59,20 @@
     }
     .input-container {
         margin-top: 20px;
+        display: flex; /* Mengatur input dan tombol dalam satu baris */
+        flex-wrap: wrap; /* Agar bisa turun baris di layar kecil */
+        justify-content: center; /* Memusatkan elemen */
+        gap: 10px; /* Memberi sedikit jarak antar elemen input */
     }
     .input-container input[type="text"] {
         width: 180px;
         padding: 8px;
         border: none;
         border-radius: 5px;
-        margin-right: 10px;
         font-size: 16px;
         box-sizing: border-box;
-        background-color: #333; /* Warna latar belakang input */
-        color: #eee; /* Warna teks input */
+        background-color: #333;
+        color: #eee;
     }
     .input-container button {
         padding: 10px 20px;
@@ -78,6 +82,10 @@
         border-radius: 5px;
         cursor: pointer;
         font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+    .input-container button:hover {
+        background-color: #2980b9;
     }
     .tooltip {
         visibility: hidden;
@@ -100,11 +108,11 @@
         opacity: 1;
     }
 
-    /* Gaya baru untuk tabel data spreadsheet */
+    /* Gaya untuk tabel data spreadsheet */
     .spreadsheet-data-container {
         margin-top: 40px;
-        width: 90%; /* Memberikan lebar yang lebih fleksibel */
-        max-width: 900px; /* Batasi lebar maksimum */
+        width: 90%;
+        max-width: 900px;
         background-color: #1a1a1a;
         border: 2px solid #3498db;
         border-radius: 8px;
@@ -122,7 +130,7 @@
         width: 100%;
         border-collapse: collapse;
         margin-top: 15px;
-        min-width: 500px; /* Tambahkan lebar minimum agar tidak terlalu sempit */
+        min-width: 500px;
     }
     .spreadsheet-table th, .spreadsheet-table td {
         border: 1px solid #333;
@@ -142,6 +150,118 @@
     .spreadsheet-table tr:hover {
         background-color: #3a3a3a;
     }
+
+    /* Gaya untuk tombol spreadsheet baru */
+    .spreadsheet-button-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .spreadsheet-button {
+        display: inline-block; /* Agar bisa diatur padding dan margin seperti tombol */
+        padding: 10px 20px;
+        background-color: #27ae60; /* Warna hijau untuk tombol link */
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        text-decoration: none; /* Hapus garis bawah default link */
+        transition: background-color 0.3s ease;
+    }
+
+    .spreadsheet-button:hover {
+        background-color: #229a54;
+    }
+
+    /* --- Media Queries untuk Responsivitas --- */
+
+    /* Untuk perangkat dengan lebar layar maksimal 768px (umumnya HP dan tablet kecil) */
+    @media (max-width: 768px) {
+        .container {
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+
+        .row {
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+
+        .box {
+            width: 90%;
+            max-width: 300px;
+            height: auto;
+            margin: 10px auto;
+            padding: 15px;
+        }
+
+        .data {
+            font-size: 22px;
+        }
+
+        .key {
+            font-size: 18px;
+        }
+
+        .input-container {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-container input[type="text"] {
+            width: 90%;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .input-container button {
+            width: 90%;
+            padding: 12px 20px;
+        }
+
+        /* Sesuaikan ukuran speedometer dan thermometer di HP */
+        .box canvas {
+            width: 150px;
+            height: 150px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .box div[style*="thermometer"] {
+            width: 50px !important;
+            height: 140px !important;
+            margin: 10px auto !important;
+        }
+
+        .spreadsheet-data-container {
+            width: 95%;
+            padding: 15px;
+        }
+
+        .spreadsheet-table th, .spreadsheet-table td {
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .spreadsheet-button {
+            width: 90%; /* Sesuaikan lebar tombol spreadsheet di HP */
+            padding: 12px 20px;
+        }
+    }
+
+    /* Untuk perangkat dengan lebar layar yang lebih kecil dari 480px (sangat kecil) */
+    @media (max-width: 480px) {
+        .box {
+            width: 95%;
+        }
+
+        .input-container input[type="text"],
+        .input-container button,
+        .spreadsheet-button { /* Tambahkan tombol spreadsheet di sini juga */
+            width: 95%;
+        }
+    }
 </style>
 </head>
 <body>
@@ -157,6 +277,12 @@
         <button onclick="updatePH()">Update pH</button>
     </div>
 
+    <div class="spreadsheet-button-container">
+        <a href="https://docs.google.com/spreadsheets/d/14NQLTG3l_67vTW7JayF60H7iXZEREZJ0/edit?usp=sharing&ouid=107271610810766793524&rtpof=true&sd=true" target="_blank" class="spreadsheet-button">
+            Lihat Data Spreadsheet Lengkap
+        </a>
+    </div>
+
     <div class="spreadsheet-data-container">
         <h2>10 Data Terakhir dari Spreadsheet</h2>
         <div id="spreadsheetDataTable"></div>
@@ -167,26 +293,25 @@
 <script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-database.js"></script>
 <script>
     // Inisialisasi Firebase
-var firebaseConfig = {
-  apiKey: "AIzaSyDdMEwLTbLiycZXaeFlvLPtQGIP98XFDwg",
-  authDomain: "grahitoskripsi.firebaseapp.com",
-  databaseURL: "https://grahitoskripsi-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "grahitoskripsi",
-  storageBucket: "grahitoskripsi.firebasestorage.app",
-  messagingSenderId: "342467723978",
-  appId: "1:342467723978:web:99da33c14a8a94eecfaa33",
-  measurementId: "G-QYKM9JHJQQ"
-};
+    var firebaseConfig = {
+        apiKey: "AIzaSyDdMEwLTbLiycZXaeFlvLPtQGIP98XFDwg",
+        authDomain: "grahitoskripsi.firebaseapp.com",
+        databaseURL: "https://grahitoskripsi-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "grahitoskripsi",
+        storageBucket: "grahitoskripsi.firebasestorage.app",
+        messagingSenderId: "342467723978",
+        appId: "1:342467723978:web:99da33c14a8a94eecfaa33",
+        measurementId: "G-QYKM9JHJQQ"
+    };
     firebase.initializeApp(firebaseConfig);
 
     var tooltips = {
         'NutrientCapacity': 'Ini adalah Kapasitas Nutrisi Yang Terukur saat ini melalui sensor',
         'NutrientLimit': 'Ini adalah Batasan Nutrisi yang harus dipertahankan',
-        'pH': 'Ini adalah Tingkat pH yang Terukur',
-        'Temperature': 'Ini adalah Suhu yang Terukur',
+        'pH': 'Ini adalah Tingkat pH yang Terukur (Set Point)',
         'pH+': 'pH+ Adalah kapasitas pH+ yang terukur saat ini melalui sensor',
-        'pH-': 'pH- Adalah kapasitas pH+ yang terukur saat ini melalui sensor',
-        'pHTerukur': 'pHterukur adalah pH yang terukur saat ini melalui sensor'
+        'pH-': 'pH- Adalah kapasitas pH- yang terukur saat ini melalui sensor',
+        'pHTerukur': 'pH Terukur adalah pH yang terukur saat ini melalui sensor'
     };
 
     function createBox(childKey, childData) {
@@ -199,8 +324,7 @@ var firebaseConfig = {
         tooltipElement.className = 'tooltip';
         tooltipElement.textContent = tooltips[childKey] || 'Deskripsi tidak tersedia';
 
-        if (childKey === 'pHTerukur' || childKey === 'pH') { // Gabungkan kondisi pH
-            // Buat animasi termometer
+        if (childKey === 'pHTerukur' || childKey === 'pH') {
             var thermometerDiv = document.createElement('div');
             thermometerDiv.style.width = '60px';
             thermometerDiv.style.height = '160px';
@@ -208,6 +332,7 @@ var firebaseConfig = {
             thermometerDiv.style.borderRadius = '30px';
             thermometerDiv.style.margin = '10px auto';
             thermometerDiv.style.position = 'relative';
+            thermometerDiv.style.overflow = 'hidden';
 
             var mercuryDiv = document.createElement('div');
             mercuryDiv.style.width = '100%';
@@ -216,7 +341,7 @@ var firebaseConfig = {
             mercuryDiv.style.background = '#ff3333';
             mercuryDiv.style.borderRadius = '30px';
             mercuryDiv.style.transition = 'height 0.5s ease-out';
-            mercuryDiv.style.height = (childData / 14 * 100) + '%'; // Asumsi skala pH dari 0 sampai 14
+            mercuryDiv.style.height = (Math.max(0, Math.min(14, childData)) / 14 * 100) + '%'; 
 
             thermometerDiv.appendChild(mercuryDiv);
             boxDiv.appendChild(thermometerDiv);
@@ -247,7 +372,8 @@ var firebaseConfig = {
         var radius = 70;
         var startAngle = Math.PI * 0.75;
         var endAngle = Math.PI * 2.25;
-        var currentAngle = startAngle + (endAngle - startAngle) * (value / 100);
+        var safeValue = Math.max(0, Math.min(100, value));
+        var currentAngle = startAngle + (endAngle - startAngle) * (safeValue / 100);
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -320,26 +446,28 @@ var firebaseConfig = {
         var nutrientLimitInput = parseInt(document.getElementById('nutrientLimitInput').value);
         if (!isNaN(nutrientLimitInput)) {
             firebase.database().ref('data/SetPoint/NutrientLimit').set(nutrientLimitInput)
-                .then(() => console.log("NutrientLimit updated successfully!"))
-                .catch((error) => console.error("Error updating NutrientLimit: ", error));
+                .then(() => alert("NutrientLimit berhasil diperbarui!"))
+                .catch((error) => alert("Error memperbarui NutrientLimit: " + error.message));
         } else {
             alert("Input Nutrisi harus angka.");
         }
+        document.getElementById('nutrientLimitInput').value = '';
     }
 
     function updatePH() {
         var pHInput = parseFloat(document.getElementById('pHInput').value);
-        if (!isNaN(pHInput)) {
+        if (!isNaN(pHInput) && pHInput >= 0 && pHInput <= 14) {
             firebase.database().ref('data/SetPoint/pH').set(pHInput)
-                .then(() => console.log("pH updated successfully!"))
-                .catch((error) => console.error("Error updating pH: ", error));
+                .then(() => alert("pH berhasil diperbarui!"))
+                .catch((error) => alert("Error memperbarui pH: " + error.message));
         } else {
-            alert("Input pH harus angka.");
+            alert("Input pH harus angka antara 0 dan 14.");
         }
+        document.getElementById('pHInput').value = '';
     }
 
     // URL PUBLIK SPREADSHEET ANDA (sudah diisi dengan link yang Anda berikan)
-    const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR8n864HWpW6pRQ3miS0WzeUBjv2YN2RCT_xFUp7zsozeFkCcSCvvG_BShVDgNAuQ/pub?gid=569741183&single=true&output=csv'; 
+    const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR8n864HWpW6pRQ3miS0WzeUBjv2YN2RCT_xFUp7zsozeFkCcSCvvG_BShVDgNAuQ/pub?gid=569741183&single=true&output=csv';
 
     async function fetchSpreadsheetData() {
         try {
@@ -348,17 +476,22 @@ var firebaseConfig = {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const csvText = await response.text();
-            
-            // Menguraikan CSV
+
             const rows = csvText.trim().split('\n');
-            const headers = rows[0].split(',').map(header => header.trim()); // Ambil header
-            const dataRows = rows.slice(1); // Ambil baris data
-            
-            // Ambil 10 data terakhir
+            const nonEmptyRows = rows.filter(row => row.trim() !== '');
+
+            if (nonEmptyRows.length < 1) {
+                document.getElementById('spreadsheetDataTable').textContent = 'Tidak ada data ditemukan di spreadsheet.';
+                return;
+            }
+
+            const headers = nonEmptyRows[0].split(',').map(header => header.trim());
+            const dataRows = nonEmptyRows.slice(1);
+
             const last10Data = dataRows.slice(Math.max(0, dataRows.length - 10));
 
             const tableContainer = document.getElementById('spreadsheetDataTable');
-            tableContainer.innerHTML = ''; // Bersihkan konten sebelumnya
+            tableContainer.innerHTML = '';
 
             if (last10Data.length === 0) {
                 tableContainer.textContent = 'Tidak ada data ditemukan di spreadsheet.';
@@ -368,7 +501,6 @@ var firebaseConfig = {
             const table = document.createElement('table');
             table.className = 'spreadsheet-table';
 
-            // Buat header tabel
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
             headers.forEach(headerText => {
@@ -379,15 +511,13 @@ var firebaseConfig = {
             thead.appendChild(headerRow);
             table.appendChild(thead);
 
-            // Buat baris data
             const tbody = document.createElement('tbody');
-            last10Data.reverse().forEach(rowData => { // reverse() agar yang terbaru di atas
-                if (rowData.trim() === '') return; // Lewati baris kosong jika ada
+            last10Data.reverse().forEach(rowData => {
                 const tr = document.createElement('tr');
                 const values = rowData.split(',').map(value => value.trim());
-                values.forEach(value => {
+                headers.forEach((_, index) => {
                     const td = document.createElement('td');
-                    td.textContent = value;
+                    td.textContent = values[index] || '';
                     tr.appendChild(td);
                 });
                 tbody.appendChild(tr);
@@ -402,11 +532,8 @@ var firebaseConfig = {
         }
     }
 
-    // Panggil fungsi untuk mengambil data spreadsheet saat halaman dimuat
     fetchSpreadsheetData();
-    // Anda bisa juga mengatur interval untuk memuat ulang data secara berkala
-    // setInterval(fetchSpreadsheetData, 60000); // Muat ulang setiap 60 detik (sesuaikan jika perlu)
-
+    setInterval(fetchSpreadsheetData, 30000);
 </script>
 </body>
 </html>
