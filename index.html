@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data IoT</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #222222;
+        margin: 0;
+        padding: 0;
+        color: #ffffff; /* Tambahkan warna teks default untuk keseluruhan body */
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 50px;
+    }
+    .row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .column {
+        margin: 0 10px;
+    }
+    .box {
+        width: 220px;
+        height: 260px;
+        border: 2px solid #3498db;
+        padding: 10px;
+        margin: 10px;
+        border-radius: 8px;
+        text-align: center;
+        background-color: #1a1a1a;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    .box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .data {
+        font-size: 20px;
+        color: #ffffff;
+        margin-top: 10px;
+        line-height: 1.4;
+    }
+    .key {
+        font-size: 16px;
+        color: #ffffff;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .input-container {
+        margin-top: 20px;
+    }
+    .input-container input[type="text"] {
+        width: 180px;
+        padding: 8px;
+        border: none;
+        border-radius: 5px;
+        margin-right: 10px;
+        font-size: 16px;
+        box-sizing: border-box;
+        background-color: #333; /* Warna latar belakang input */
+        color: #eee; /* Warna teks input */
+    }
+    .input-container button {
+        padding: 10px 20px;
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .tooltip {
+        visibility: hidden;
+        width: 200px;
+        background-color: #3498db;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 90%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .box:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    /* Gaya baru untuk tabel data spreadsheet */
+    .spreadsheet-data-container {
+        margin-top: 40px;
+        width: 90%; /* Memberikan lebar yang lebih fleksibel */
+        max-width: 900px; /* Batasi lebar maksimum */
+        background-color: #1a1a1a;
+        border: 2px solid #3498db;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: left;
+        overflow-x: auto; /* Tambahkan scroll horizontal jika tabel terlalu lebar */
+    }
+    .spreadsheet-data-container h2 {
+        color: #3498db;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .spreadsheet-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        min-width: 500px; /* Tambahkan lebar minimum agar tidak terlalu sempit */
+    }
+    .spreadsheet-table th, .spreadsheet-table td {
+        border: 1px solid #333;
+        padding: 10px;
+        text-align: left;
+        color: #eee;
+        white-space: nowrap; /* Mencegah teks memecah baris di sel tabel */
+    }
+    .spreadsheet-table th {
+        background-color: #34495e;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    .spreadsheet-table tr:nth-child(even) {
+        background-color: #2a2a2a;
+    }
+    .spreadsheet-table tr:hover {
+        background-color: #3a3a3a;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="row" id="displayRow"></div>
+    <div class="row" id="setPointRow"></div>
+    <div class="input-container">
+        <input type="text" id="nutrientLimitInput" placeholder="Nutrient Limit">
+        <button onclick="updateNutrientLimit()">Update Nutrient Limit</button>
+    </div>
+    <div class="input-container">
+        <input type="text" id="pHInput" placeholder="pH">
+        <button onclick="updatePH()">Update pH</button>
+    </div>
+
+    <div class="spreadsheet-data-container">
+        <h2>10 Data Terakhir dari Spreadsheet</h2>
+        <div id="spreadsheetDataTable"></div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.3.3/firebase-database.js"></script>
+<script>
+    // Inisialisasi Firebase
+var firebaseConfig = {
+  apiKey: "AIzaSyDdMEwLTbLiycZXaeFlvLPtQGIP98XFDwg",
+  authDomain: "grahitoskripsi.firebaseapp.com",
+  databaseURL: "https://grahitoskripsi-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "grahitoskripsi",
+  storageBucket: "grahitoskripsi.firebasestorage.app",
+  messagingSenderId: "342467723978",
+  appId: "1:342467723978:web:99da33c14a8a94eecfaa33",
+  measurementId: "G-QYKM9JHJQQ"
+};
+    firebase.initializeApp(firebaseConfig);
+
+    var tooltips = {
+        'NutrientCapacity': 'Ini adalah Kapasitas Nutrisi Yang Terukur saat ini melalui sensor',
+        'NutrientLimit': 'Ini adalah Batasan Nutrisi yang harus dipertahankan',
+        'pH': 'Ini adalah Tingkat pH yang Terukur',
+        'Temperature': 'Ini adalah Suhu yang Terukur',
+        'pH+': 'pH+ Adalah kapasitas pH+ yang terukur saat ini melalui sensor',
+        'pH-': 'pH- Adalah kapasitas pH+ yang terukur saat ini melalui sensor',
+        'pHTerukur': 'pHterukur adalah pH yang terukur saat ini melalui sensor'
+    };
+
+    function createBox(childKey, childData) {
+        var boxDiv = document.createElement('div');
+        boxDiv.className = 'box';
+        var keyElement = document.createElement('p');
+        keyElement.className = 'key';
+        keyElement.textContent = childKey;
+        var tooltipElement = document.createElement('span');
+        tooltipElement.className = 'tooltip';
+        tooltipElement.textContent = tooltips[childKey] || 'Deskripsi tidak tersedia';
+
+        if (childKey === 'pHTerukur' || childKey === 'pH') { // Gabungkan kondisi pH
+            // Buat animasi termometer
+            var thermometerDiv = document.createElement('div');
+            thermometerDiv.style.width = '60px';
+            thermometerDiv.style.height = '160px';
+            thermometerDiv.style.background = 'linear-gradient(to top, #ff3333, #ff6666, #ff9999, #ffffff)';
+            thermometerDiv.style.borderRadius = '30px';
+            thermometerDiv.style.margin = '10px auto';
+            thermometerDiv.style.position = 'relative';
+
+            var mercuryDiv = document.createElement('div');
+            mercuryDiv.style.width = '100%';
+            mercuryDiv.style.position = 'absolute';
+            mercuryDiv.style.bottom = '0';
+            mercuryDiv.style.background = '#ff3333';
+            mercuryDiv.style.borderRadius = '30px';
+            mercuryDiv.style.transition = 'height 0.5s ease-out';
+            mercuryDiv.style.height = (childData / 14 * 100) + '%'; // Asumsi skala pH dari 0 sampai 14
+
+            thermometerDiv.appendChild(mercuryDiv);
+            boxDiv.appendChild(thermometerDiv);
+        } else {
+            var canvas = document.createElement('canvas');
+            canvas.width = 180;
+            canvas.height = 180;
+            boxDiv.appendChild(canvas);
+
+            drawSpeedometer(canvas, childData);
+        }
+
+        var valueElement = document.createElement('p');
+        valueElement.className = 'data';
+        valueElement.textContent = childData;
+
+        boxDiv.appendChild(keyElement);
+        boxDiv.appendChild(valueElement);
+        boxDiv.appendChild(tooltipElement);
+
+        return boxDiv;
+    }
+
+    function drawSpeedometer(canvas, value) {
+        var ctx = canvas.getContext('2d');
+        var centerX = canvas.width / 2;
+        var centerY = canvas.height / 2;
+        var radius = 70;
+        var startAngle = Math.PI * 0.75;
+        var endAngle = Math.PI * 2.25;
+        var currentAngle = startAngle + (endAngle - startAngle) * (value / 100);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Background arc
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.lineWidth = 20;
+        ctx.strokeStyle = '#ccc';
+        ctx.stroke();
+
+        // Foreground arc
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, startAngle, currentAngle);
+        ctx.lineWidth = 20;
+        var gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#3498db');
+        gradient.addColorStop(1, '#2ecc71');
+        ctx.strokeStyle = gradient;
+        ctx.stroke();
+
+        // Needle
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX + radius * Math.cos(currentAngle), centerY + radius * Math.sin(currentAngle));
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#e74c3c';
+        ctx.stroke();
+
+        // Center circle
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 10, 0, Math.PI * 2);
+        ctx.fillStyle = '#e74c3c';
+        ctx.fill();
+
+        // Min and Max markers
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText('0', centerX - radius - 5, centerY + 80);
+        ctx.fillText('100', centerX + radius + 5, centerY + 80);
+    }
+
+    // Referensi ke Firebase Database untuk "data/Display"
+    var displayRef = firebase.database().ref('data/Display');
+    displayRef.on('value', function(snapshot) {
+        var displayRow = document.getElementById('displayRow');
+        displayRow.innerHTML = '';
+        snapshot.forEach(function(childSnapshot) {
+            var childKey = childSnapshot.key;
+            var childData = childSnapshot.val();
+            var boxDiv = createBox(childKey, childData);
+            displayRow.appendChild(boxDiv);
+        });
+    });
+
+    // Referensi ke Firebase Database untuk "data/SetPoint"
+    var setPointRef = firebase.database().ref('data/SetPoint');
+    setPointRef.on('value', function(snapshot) {
+        var setPointRow = document.getElementById('setPointRow');
+        setPointRow.innerHTML = '';
+        snapshot.forEach(function(childSnapshot) {
+            var childKey = childSnapshot.key;
+            var childData = childSnapshot.val();
+            var boxDiv = createBox(childKey, childData);
+            setPointRow.appendChild(boxDiv);
+        });
+    });
+
+    function updateNutrientLimit() {
+        var nutrientLimitInput = parseInt(document.getElementById('nutrientLimitInput').value);
+        if (!isNaN(nutrientLimitInput)) {
+            firebase.database().ref('data/SetPoint/NutrientLimit').set(nutrientLimitInput)
+                .then(() => console.log("NutrientLimit updated successfully!"))
+                .catch((error) => console.error("Error updating NutrientLimit: ", error));
+        } else {
+            alert("Input Nutrisi harus angka.");
+        }
+    }
+
+    function updatePH() {
+        var pHInput = parseFloat(document.getElementById('pHInput').value);
+        if (!isNaN(pHInput)) {
+            firebase.database().ref('data/SetPoint/pH').set(pHInput)
+                .then(() => console.log("pH updated successfully!"))
+                .catch((error) => console.error("Error updating pH: ", error));
+        } else {
+            alert("Input pH harus angka.");
+        }
+    }
+
+    // URL PUBLIK SPREADSHEET ANDA (sudah diisi dengan link yang Anda berikan)
+    const SPREADSHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR8n864HWpW6pRQ3miS0WzeUBjv2YN2RCT_xFUp7zsozeFkCcSCvvG_BShVDgNAuQ/pub?gid=569741183&single=true&output=csv'; 
+
+    async function fetchSpreadsheetData() {
+        try {
+            const response = await fetch(SPREADSHEET_URL);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const csvText = await response.text();
+            
+            // Menguraikan CSV
+            const rows = csvText.trim().split('\n');
+            const headers = rows[0].split(',').map(header => header.trim()); // Ambil header
+            const dataRows = rows.slice(1); // Ambil baris data
+            
+            // Ambil 10 data terakhir
+            const last10Data = dataRows.slice(Math.max(0, dataRows.length - 10));
+
+            const tableContainer = document.getElementById('spreadsheetDataTable');
+            tableContainer.innerHTML = ''; // Bersihkan konten sebelumnya
+
+            if (last10Data.length === 0) {
+                tableContainer.textContent = 'Tidak ada data ditemukan di spreadsheet.';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'spreadsheet-table';
+
+            // Buat header tabel
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Buat baris data
+            const tbody = document.createElement('tbody');
+            last10Data.reverse().forEach(rowData => { // reverse() agar yang terbaru di atas
+                if (rowData.trim() === '') return; // Lewati baris kosong jika ada
+                const tr = document.createElement('tr');
+                const values = rowData.split(',').map(value => value.trim());
+                values.forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+
+            tableContainer.appendChild(table);
+
+        } catch (error) {
+            console.error('Error fetching or parsing spreadsheet data:', error);
+            document.getElementById('spreadsheetDataTable').textContent = 'Gagal memuat data spreadsheet. Pastikan URL benar dan spreadsheet dipublikasikan.';
+        }
+    }
+
+    // Panggil fungsi untuk mengambil data spreadsheet saat halaman dimuat
+    fetchSpreadsheetData();
+    // Anda bisa juga mengatur interval untuk memuat ulang data secara berkala
+    // setInterval(fetchSpreadsheetData, 60000); // Muat ulang setiap 60 detik (sesuaikan jika perlu)
+
+</script>
+</body>
+</html>
