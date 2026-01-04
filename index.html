@@ -54,33 +54,34 @@
         color: #ffffff;
         font-weight: bold;
         margin-bottom: 5px;
+        position: relative;
     }
     .tooltip {
-        visibility: hidden;
-        width: 180px;
-        background-color: #3498db;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 8px;
+        display: none;
         position: absolute;
-        z-index: 100;
-        bottom: 100%;
+        top: -80px;
         left: 50%;
         transform: translateX(-50%);
-        margin-bottom: 10px;
-        opacity: 0;
-        transition: opacity 0.3s, visibility 0.3s;
-        font-size: 14px;
-        pointer-events: none;
-        white-space: normal;
-        word-wrap: break-word;
+        background-color: #3498db;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        width: 180px;
+        text-align: center;
+        z-index: 1000;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        font-size: 14px;
+        line-height: 1.4;
     }
-    .box:hover .tooltip,
-    .box.tooltip-active .tooltip {
-        visibility: visible;
-        opacity: 1;
+    .tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 8px;
+        border-style: solid;
+        border-color: #3498db transparent transparent transparent;
     }
     .input-container {
         margin-top: 20px;
@@ -194,7 +195,8 @@
         .tooltip {
             width: 160px;
             font-size: 13px;
-            padding: 6px;
+            padding: 6px 10px;
+            top: -70px;
         }
         .data {
             font-size: 22px;
@@ -243,14 +245,15 @@
         .box {
             width: 95%;
         }
+        .tooltip {
+            width: 140px;
+            font-size: 12px;
+            top: -60px;
+        }
         .input-container input[type="text"],
         .input-container button,
         .spreadsheet-button {
             width: 95%;
-        }
-        .tooltip {
-            width: 140px;
-            font-size: 12px;
         }
     }
 </style>
@@ -305,56 +308,38 @@
         'pHTerukur': 'pH Terukur adalah pH yang terukur saat ini melalui sensor'
     };
 
-    // Fungsi untuk menangani tooltip di mobile
-    function setupTooltipEvents() {
-        document.addEventListener('DOMContentLoaded', function() {
-            // Event untuk desktop (hover) sudah dihandle oleh CSS
-            // Event untuk mobile (touch)
-            document.addEventListener('touchstart', function(e) {
-                const box = e.target.closest('.box');
-                if (box) {
-                    // Hapus tooltip-active dari semua box
-                    document.querySelectorAll('.box').forEach(b => {
-                        b.classList.remove('tooltip-active');
-                    });
-                    // Tambah ke box yang disentuh
-                    box.classList.add('tooltip-active');
-                    
-                    // Hapus setelah 3 detik
-                    setTimeout(() => {
-                        box.classList.remove('tooltip-active');
-                    }, 3000);
-                }
-            });
-            
-            // Klik di luar untuk menutup tooltip
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.box')) {
-                    document.querySelectorAll('.box').forEach(b => {
-                        b.classList.remove('tooltip-active');
-                    });
-                }
-            });
-        });
-    }
-
-    // Panggil fungsi setup tooltip
-    setupTooltipEvents();
-
     function createBox(childKey, childData) {
         var boxDiv = document.createElement('div');
         boxDiv.className = 'box';
+        boxDiv.id = 'box-' + childKey;
         
-        // Tambahkan tooltip
-        var tooltipElement = document.createElement('span');
+        // Buat tooltip
+        var tooltipElement = document.createElement('div');
         tooltipElement.className = 'tooltip';
+        tooltipElement.id = 'tooltip-' + childKey;
         tooltipElement.textContent = tooltips[childKey] || 'Deskripsi tidak tersedia';
-        boxDiv.appendChild(tooltipElement);
-
+        
         var keyElement = document.createElement('p');
         keyElement.className = 'key';
         keyElement.textContent = childKey;
-        boxDiv.appendChild(keyElement);
+        
+        // Tambahkan event untuk tooltip
+        boxDiv.addEventListener('mouseenter', function() {
+            tooltipElement.style.display = 'block';
+        });
+        
+        boxDiv.addEventListener('mouseleave', function() {
+            tooltipElement.style.display = 'none';
+        });
+        
+        // Untuk mobile
+        boxDiv.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            tooltipElement.style.display = 'block';
+            setTimeout(function() {
+                tooltipElement.style.display = 'none';
+            }, 2000);
+        });
 
         if (childKey === 'pHTerukur' || childKey === 'pH') {
             var thermometerDiv = document.createElement('div');
@@ -376,13 +361,18 @@
             mercuryDiv.style.height = (Math.max(0, Math.min(14, childData)) / 14 * 100) + '%'; 
 
             thermometerDiv.appendChild(mercuryDiv);
+            boxDiv.appendChild(tooltipElement);
+            boxDiv.appendChild(keyElement);
             boxDiv.appendChild(thermometerDiv);
         } else {
             var canvas = document.createElement('canvas');
             canvas.width = 180;
             canvas.height = 180;
+            
+            boxDiv.appendChild(tooltipElement);
+            boxDiv.appendChild(keyElement);
             boxDiv.appendChild(canvas);
-
+            
             drawSpeedometer(canvas, childData);
         }
 
@@ -564,12 +554,6 @@
     // Load data saat pertama kali dan refresh setiap 30 detik
     fetchSpreadsheetData();
     setInterval(fetchSpreadsheetData, 30000);
-    
-    // Inisialisasi tooltip setelah semua elemen dimuat
-    document.addEventListener('DOMContentLoaded', function() {
-        // Setup tooltip untuk box yang sudah ada
-        setTimeout(setupTooltipEvents, 1000);
-    });
 </script>
 </body>
 </html>
